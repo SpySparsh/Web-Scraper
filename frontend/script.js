@@ -21,7 +21,7 @@ searchForm.addEventListener('submit', async (e) => {
   try {
     // Make POST request to the API
     // Ensure this matches your backend URL and Port
-    const response = await fetch('https://web-scraper-9v14.onrender.com/api/search', {
+    const response = await fetch('https://web-scraper-1-jljf.onrender.com/api/search', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
