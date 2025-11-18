@@ -29,7 +29,7 @@ const SearchScraper = () => {
     setResults([]);
 
     try {
-      const response = await fetch("https://web-scraper-9v14.onrender.com/api/search", {
+      const response = await fetch("https://web-scraper-1-jljf.onrender.com/api/search", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
