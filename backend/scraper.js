@@ -4,14 +4,15 @@ async function scrapeGoogle(query) {
   // 1. Launch the browser
   // We keep headless: false so you can see it working.
   const browser = await puppeteer.launch({
-    headless: 'new', // MUST be headless in production
+    headless: 'new',
+    // This line is the magic key for Render:
+    executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || '/usr/bin/google-chrome',
     args: [
       '--no-sandbox',
       '--disable-setuid-sandbox',
-      '--single-process', // Helps on low-memory free tiers
+      '--single-process',
       '--no-zygote'
-    ],
-    executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || puppeteer.executablePath(),
+    ]
   });
 
   try {
