@@ -1,10 +1,10 @@
 const puppeteer = require('puppeteer');
 
 async function scrapeGoogle(query) {
-  // 1. Launch the browser
-  // We keep headless: false so you can see it working.
   const browser = await puppeteer.launch({
     headless: 'new',
+    // CRITICAL: This points to the Chrome we installed via the build script
+    executablePath: '/usr/bin/google-chrome-stable', 
     args: [
       '--no-sandbox',
       '--disable-setuid-sandbox',
@@ -16,57 +16,54 @@ async function scrapeGoogle(query) {
   try {
     const page = await browser.newPage();
     
-    // 2. Go to DuckDuckGo (HTML Version)
-    // This version is faster, lighter, and has NO aggressive anti-bot/CAPTCHA checks.
-    // It is perfect for a portfolio project because it won't crash with 500 errors.
+    // Set a generic User Agent
+    await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36');
+
+    // Go to DuckDuckGo HTML version (Fast & Reliable)
     await page.goto('https://html.duckduckgo.com/html/', { waitUntil: 'domcontentloaded' });
 
-    // 3. Find the search input and type the query
-    // The name of the input field on this page is "q"
+    // Find the search input
     const searchInputSelector = 'input[name="q"]';
     await page.waitForSelector(searchInputSelector);
+    
+    // Type the query
     await page.type(searchInputSelector, query);
     
-    // 4. Submit the form
+    // Submit
     await page.keyboard.press('Enter');
     
-    // 5. Wait for results to load
-    // The class '.result' is the container for each search result
+    // Wait for results container
     await page.waitForSelector('.result', { timeout: 10000 });
 
-    // 6. Scrape the data
+    // Scrape the data
     const results = await page.evaluate(() => {
       const data = [];
       const items = document.querySelectorAll('.result');
 
       items.forEach((item) => {
-        // Extract title anchor tag and snippet div
         const titleEl = item.querySelector('.result__title a');
         const snippetEl = item.querySelector('.result__snippet');
 
-        // Only add if we found a title link
         if (titleEl) {
           data.push({
             title: titleEl.innerText.trim(),
             link: titleEl.href,
-            // Handle cases where snippet might be missing
-            snippet: snippetEl ? snippetEl.innerText.trim() : 'No snippet available'
+            snippet: snippetEl ? snippetEl.innerText.trim() : ''
           });
         }
       });
       return data;
     });
     
-    // Return top 10 results
     return results.slice(0, 10);
 
   } catch (error) {
     console.error("Puppeteer Error:", error);
-    // This re-throws the error so your backend knows something went wrong
     throw error; 
   } finally {
-    // Always close the browser, even if there was an error
-    await browser.close();
+    if (browser) {
+        await browser.close();
+    }
   }
 }
 
